@@ -1,9 +1,6 @@
-#lex/yacc calculator
-#supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
-import math
+# lex/yacc calculator
+# supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
 import ply.lex as lex
-import ply.yacc as yacc
-import sys
 
 tokens = [
     'PLUS',
@@ -18,8 +15,6 @@ tokens = [
     'LPAREN',
     'RPAREN'
 ]
-
-t_ignore = r' '
 
 t_PLUS = r'\+'
 t_MINUS = r'\-'
@@ -39,35 +34,55 @@ t_SQRT = r'\rad'
 """
 
 """
-def t_INT(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
-def t_FLOAT(t):
-    r'\d+\.\d+'
-    t.value = float(t.value)
-    return t
-    """
 
 def t_VAR(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = 'VAR'
     return t
+      """
 
 def t_FUNCTION(t):
     r'sin|cos|tan|log|rad'
     return t
 
-def t_NUMBER(t):
-    r'([0-9]+\.[0-9]*)'
+def t_FLOAT(t):
+    r'[+-]?([1-9][0-9]*\.[0-9]+)|(0\.[0-9]+)'
     t.value = float(t.value)
     return t
+
+def t_INT(t):
+    r'[+-]?[1-9][0-9]*|0'
+    t.value = int(t.value)
+    return t
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
+
+t_ignore = r' /t'
+
 
 def t_error(t):
     print("Syntax error")
     t.lexer.skip(1)
 
+
+# lexer = lex.lex()
+
+# def p_function_exp(p):
+#     'function : expression PLUS function'
+#     p[0] = p[1] + p[3]
+
+
+
 lexer = lex.lex()
+data = 'sin'
+lexer.input(data)
 
-
+# Tokenize
+while True:
+    tok = lexer.token()
+    if not tok:
+        break  # No more input
+    print(tok)
