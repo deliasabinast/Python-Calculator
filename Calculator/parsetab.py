@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'leftPLUSMINUSleftMULDIVleftPOWDIV FLOAT FUNCTION INT LPAREN MINUS MUL PLUS POW RPAREN\n    calc : expression\n        | empty\n    \n    expression : expression POW expression\n                | expression MUL expression\n                | expression DIV expression\n                | expression PLUS expression\n                | expression MINUS expression\n    \n    expression : INT\n                | FLOAT\n    \n    empty :\n    '
+_lr_signature = 'leftPLUSMINUSleftMULDIVleftPOWrightUMINUSDIV FLOAT FUNCTION INT LP MINUS MUL PLUS POW RP\n    calc : expression\n        | empty\n    \n    expression : FUNCTION LP expression RP\n    \n    expression : expression POW expression\n                | expression MUL expression\n                | expression DIV expression\n                | expression PLUS expression\n                | expression MINUS expression\n    \n    expression : MINUS expression %prec UMINUS\n    \n    expression : INT\n                | FLOAT\n    \n    empty :\n    '
     
-_lr_action_items = {'INT':([0,6,7,8,9,10,],[4,4,4,4,4,4,]),'FLOAT':([0,6,7,8,9,10,],[5,5,5,5,5,5,]),'$end':([0,1,2,3,4,5,11,12,13,14,15,],[-10,0,-1,-2,-8,-9,-3,-4,-5,-6,-7,]),'POW':([2,4,5,11,12,13,14,15,],[6,-8,-9,-3,6,6,6,6,]),'MUL':([2,4,5,11,12,13,14,15,],[7,-8,-9,-3,-4,-5,7,7,]),'DIV':([2,4,5,11,12,13,14,15,],[8,-8,-9,-3,-4,-5,8,8,]),'PLUS':([2,4,5,11,12,13,14,15,],[9,-8,-9,-3,-4,-5,-6,-7,]),'MINUS':([2,4,5,11,12,13,14,15,],[10,-8,-9,-3,-4,-5,-6,-7,]),}
+_lr_action_items = {'FUNCTION':([0,5,8,9,10,11,12,13,],[4,4,4,4,4,4,4,4,]),'MINUS':([0,2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,],[5,12,5,-10,-11,5,5,5,5,5,5,-9,-4,-5,-6,-7,-8,12,-3,]),'INT':([0,5,8,9,10,11,12,13,],[6,6,6,6,6,6,6,6,]),'FLOAT':([0,5,8,9,10,11,12,13,],[7,7,7,7,7,7,7,7,]),'$end':([0,1,2,3,6,7,14,15,16,17,18,19,21,],[-12,0,-1,-2,-10,-11,-9,-4,-5,-6,-7,-8,-3,]),'POW':([2,6,7,14,15,16,17,18,19,20,21,],[8,-10,-11,-9,-4,8,8,8,8,8,-3,]),'MUL':([2,6,7,14,15,16,17,18,19,20,21,],[9,-10,-11,-9,-4,-5,-6,9,9,9,-3,]),'DIV':([2,6,7,14,15,16,17,18,19,20,21,],[10,-10,-11,-9,-4,-5,-6,10,10,10,-3,]),'PLUS':([2,6,7,14,15,16,17,18,19,20,21,],[11,-10,-11,-9,-4,-5,-6,-7,-8,11,-3,]),'LP':([4,],[13,]),'RP':([6,7,14,15,16,17,18,19,20,21,],[-10,-11,-9,-4,-5,-6,-7,-8,21,-3,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'calc':([0,],[1,]),'expression':([0,6,7,8,9,10,],[2,11,12,13,14,15,]),'empty':([0,],[3,]),}
+_lr_goto_items = {'calc':([0,],[1,]),'expression':([0,5,8,9,10,11,12,13,],[2,14,15,16,17,18,19,20,]),'empty':([0,],[3,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,14 +27,16 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> calc","S'",1,None,None,None),
-  ('calc -> expression','calc',1,'p_calc','calculator.py',70),
-  ('calc -> empty','calc',1,'p_calc','calculator.py',71),
-  ('expression -> expression POW expression','expression',3,'p_expression','calculator.py',77),
-  ('expression -> expression MUL expression','expression',3,'p_expression','calculator.py',78),
-  ('expression -> expression DIV expression','expression',3,'p_expression','calculator.py',79),
-  ('expression -> expression PLUS expression','expression',3,'p_expression','calculator.py',80),
-  ('expression -> expression MINUS expression','expression',3,'p_expression','calculator.py',81),
-  ('expression -> INT','expression',1,'p_expression_number','calculator.py',88),
-  ('expression -> FLOAT','expression',1,'p_expression_number','calculator.py',89),
-  ('empty -> <empty>','empty',0,'p_empty','calculator.py',98),
+  ('calc -> expression','calc',1,'p_calc','calculator.py',72),
+  ('calc -> empty','calc',1,'p_calc','calculator.py',73),
+  ('expression -> FUNCTION LP expression RP','expression',4,'p_function','calculator.py',88),
+  ('expression -> expression POW expression','expression',3,'p_expression','calculator.py',95),
+  ('expression -> expression MUL expression','expression',3,'p_expression','calculator.py',96),
+  ('expression -> expression DIV expression','expression',3,'p_expression','calculator.py',97),
+  ('expression -> expression PLUS expression','expression',3,'p_expression','calculator.py',98),
+  ('expression -> expression MINUS expression','expression',3,'p_expression','calculator.py',99),
+  ('expression -> MINUS expression','expression',2,'p_expression_uminus','calculator.py',105),
+  ('expression -> INT','expression',1,'p_expression_number','calculator.py',111),
+  ('expression -> FLOAT','expression',1,'p_expression_number','calculator.py',112),
+  ('empty -> <empty>','empty',0,'p_empty','calculator.py',121),
 ]

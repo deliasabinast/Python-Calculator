@@ -6,30 +6,31 @@ import math
 import sys
 
 tokens = [
+    'LP',
+    'RP',
     'PLUS',
     'MINUS',
     'DIV',
     'MUL',
     'POW',
-    'FUNCTION',
     'INT',
     'FLOAT',
-    'LPAREN',
-    'RPAREN'
+    'FUNCTION'
 ]
 
+t_LP = r'\('
+t_RP = r'\)'
 t_PLUS = r'\+'
 t_MINUS = r'\-'
 t_DIV = r'\/'
 t_MUL = r'\*'
-t_POW = r'\^'
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
+t_POW = r'\^\^'
+
 
 
 def t_FUNCTION(t):
-    r'sin|cos|tan|log|rad'
-    return t
+     r'sin|cos|tan|ctg|log|rad'
+     return t
 
 def t_FLOAT(t):
     r'\d+\.\d+'
@@ -50,19 +51,20 @@ t_ignore = r' /t'
 
 
 def t_error(t):
-    print("Syntax error")
+    print("This is t_error")
     t.lexer.skip(1)
 
 
-
-lexer = lex.lex()
 # data = 'sin'
 # lexer.input(data)
 
 precedence = (
+    #('left', 'LP', 'RP'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'MUL', 'DIV'),
-    ('left', 'POW')
+    ('left', 'POW'),
+    ('right', 'UMINUS')
+    # add functions here
 )
 
 def p_calc(p):   #start
@@ -71,6 +73,22 @@ def p_calc(p):   #start
         | empty
     '''
     print(evaluate(p[1]))
+
+def expression_parentheses(p):
+    '''
+    expression : LP expression RP
+    '''
+    # p[0] = p[2]
+    # print(p[0])
+    # print(p[2])
+    p[0] = (p[2], p[1], p[3])
+
+def p_function(p):  # sin cos tg ctg rad log
+    '''
+    expression : FUNCTION LP expression RP
+    '''
+    p[0] = (p[1], p[3])  #ex: sin, 1
+
 
 def p_expression(p):   # creates a "tree" -> basic operations
     '''
@@ -82,16 +100,21 @@ def p_expression(p):   # creates a "tree" -> basic operations
     '''
     p[0] = (p[2], p[1], p[3])
 
+def p_expression_uminus(p):
+    '''
+    expression : MINUS expression %prec UMINUS
+    '''
+    p[0] = -p[2]
 
 def p_expression_number(p):   #single number
     '''
     expression : INT
                 | FLOAT
     '''
-    p[0]=p[1]
+    p[0] = p[1]
 
 def p_error(p):
-    print("Syntax error")
+    print("This is p_error")
 
 def p_empty(p):
     '''
@@ -100,10 +123,13 @@ def p_empty(p):
     p[0]=None
 
 parser = yacc.yacc()
+lexer = lex.lex()
 
 def evaluate(p):
     if type(p) == tuple:
-        if p[0] == '+':
+        if p[0] == '(' and p[1] == ')':
+            return evaluate(p[2])
+        elif p[0] == '+':
             return evaluate(p[1]) + evaluate(p[2])
         elif p[0] == '-':
             return evaluate(p[1]) - evaluate(p[2])
@@ -111,9 +137,22 @@ def evaluate(p):
             return evaluate(p[1]) * evaluate(p[2])
         elif p[0] == '/':
             return evaluate(p[1]) / evaluate(p[2])
-        elif p[0] == '^':
+        elif p[0] == '^^':
             return pow(evaluate(p[1]), evaluate(p[2]))
-
+        elif p[0] == 'sin':
+            print(p[1])
+            print("i do stuff")
+            return math.sin(evaluate(p[1]))
+        elif p[0] == 'cos':
+            return math.cos(evaluate(p[1]))
+        elif p[0] == 'tg':
+            return math.tan(evaluate(p[1]))
+        elif p[0] == 'ctg':
+            return 1 / (math.tan(evaluate(p[1])))
+        elif p[0] == 'rad':
+            return math.sqrt(evaluate(p[1]))
+        elif p[0] == 'log':
+            return math.log(evaluate(p[1]),2)
     else:
         return p
 
@@ -125,13 +164,6 @@ while True:
     except EOFError:
         break
     parser.parse(expr)
-
-        # Tokenize
-        # while True:
-        #     tok = lexer.token()
-        #     if not tok:
-        #         break  # No more input
-        #     print(tok)
 
 
 
