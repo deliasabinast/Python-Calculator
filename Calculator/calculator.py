@@ -1,9 +1,9 @@
 # lex/yacc calculator
 # supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
+import math
+
 import ply.lex as lex
 import ply.yacc as yacc
-import math
-import sys
 
 tokens = [
     'LP',
@@ -27,27 +27,29 @@ t_MUL = r'\*'
 t_POW = r'\^\^'
 
 
-
 def t_FUNCTION(t):
-     r'sin|cos|tan|ctg|log|rad'
-     return t
+    r'sin|cos|tan|ctg|log|rad'
+    return t
+
 
 def t_FLOAT(t):
     r'\d+\.\d+'
     t.value = float(t.value)
     return t
 
+
 def t_INT(t):
     r'\d+'
     t.value = int(t.value)
     return t
+
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
 
-t_ignore = r' /t'
+t_ignore = r' '
 
 
 def t_error(t):
@@ -55,42 +57,39 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-# data = 'sin'
-# lexer.input(data)
-
 precedence = (
-    #('left', 'LP', 'RP'),
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'MUL', 'DIV'),
-    ('left', 'POW'),
-    ('right', 'UMINUS')
-    # add functions here
+    ('left','PLUS','MINUS'),
+    ('left','MUL','DIV'),
+    ('left','POW'),
+    ('right','UMINUS')
 )
 
-def p_calc(p):   #start
+
+def p_calc(p):  # start
     '''
     calc : expression
         | empty
     '''
     print(evaluate(p[1]))
 
-def expression_parentheses(p):
-    '''
-    expression : LP expression RP
-    '''
-    # p[0] = p[2]
-    # print(p[0])
-    # print(p[2])
-    p[0] = (p[2], p[1], p[3])
 
 def p_function(p):  # sin cos tg ctg rad log
     '''
     expression : FUNCTION LP expression RP
     '''
-    p[0] = (p[1], p[3])  #ex: sin, 1
+    p[0] = (p[1],p[3])  # ex: sin, 1
 
 
-def p_expression(p):   # creates a "tree" -> basic operations
+def p_expression_parentheses(p):
+    '''
+    expression : LP expression RP
+    '''
+    p[0] = p[2]
+    # print(p[0])
+    # print(p[2])
+
+
+def p_expression(p):  # creates a "tree" -> basic operations
     '''
     expression : expression POW expression
                 | expression MUL expression
@@ -98,7 +97,8 @@ def p_expression(p):   # creates a "tree" -> basic operations
                 | expression PLUS expression
                 | expression MINUS expression
     '''
-    p[0] = (p[2], p[1], p[3])
+    p[0] = (p[2],p[1],p[3])
+
 
 def p_expression_uminus(p):
     '''
@@ -106,30 +106,33 @@ def p_expression_uminus(p):
     '''
     p[0] = -p[2]
 
-def p_expression_number(p):   #single number
+
+def p_expression_number(p):  # single number
     '''
     expression : INT
                 | FLOAT
     '''
     p[0] = p[1]
 
+
 def p_error(p):
     print("This is p_error")
+
 
 def p_empty(p):
     '''
     empty :
     '''
-    p[0]=None
+    p[0] = None
+
 
 parser = yacc.yacc()
 lexer = lex.lex()
 
+
 def evaluate(p):
     if type(p) == tuple:
-        if p[0] == '(' and p[1] == ')':
-            return evaluate(p[2])
-        elif p[0] == '+':
+        if p[0] == '+':
             return evaluate(p[1]) + evaluate(p[2])
         elif p[0] == '-':
             return evaluate(p[1]) - evaluate(p[2])
@@ -138,7 +141,7 @@ def evaluate(p):
         elif p[0] == '/':
             return evaluate(p[1]) / evaluate(p[2])
         elif p[0] == '^^':
-            return pow(evaluate(p[1]), evaluate(p[2]))
+            return pow(evaluate(p[1]),evaluate(p[2]))
         elif p[0] == 'sin':
             print(p[1])
             print("i do stuff")
@@ -157,16 +160,9 @@ def evaluate(p):
         return p
 
 
-
 while True:
     try:
         expr = input('>> ')
     except EOFError:
         break
     parser.parse(expr)
-
-
-
-
-
-
