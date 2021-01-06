@@ -27,6 +27,7 @@ t_MUL = r'\*'
 t_POW = r'\^\^'
 
 
+
 def t_FUNCTION(t):
     r'sin|cos|tan|ctg|log|rad'
     return t
@@ -48,9 +49,7 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-
-t_ignore = r' '
-
+t_ignore  = ' \t'
 
 def t_error(t):
     print("This is t_error")
@@ -113,7 +112,6 @@ def p_expression_number(p):  # single number
                 | FLOAT
     '''
     p[0] = p[1]
-
 
 def p_error(p):
     print("This is p_error")
