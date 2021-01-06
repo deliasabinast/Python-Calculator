@@ -1,6 +1,8 @@
 # lex/yacc calculator
 # supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
 import ply.lex as lex
+import ply.yacc as yacc
+from parseeeeer import p_calc
 
 tokens = [
     'PLUS',
@@ -74,11 +76,16 @@ def t_error(t):
 #     'function : expression PLUS function'
 #     p[0] = p[1] + p[3]
 
-
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'MUL', 'DIV'),
+    ('left', 'POW')
+)
 
 lexer = lex.lex()
 data = 'sin'
 lexer.input(data)
+
 
 # Tokenize
 while True:
@@ -86,3 +93,9 @@ while True:
     if not tok:
         break  # No more input
     print(tok)
+    parser.parse()
+
+
+
+
+
