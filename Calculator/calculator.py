@@ -2,7 +2,8 @@
 # supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
 import ply.lex as lex
 import ply.yacc as yacc
-from parseeeeer import p_calc
+import math
+import sys
 
 tokens = [
     'PLUS',
@@ -13,7 +14,6 @@ tokens = [
     'FUNCTION',
     'INT',
     'FLOAT',
-    'VAR',
     'LPAREN',
     'RPAREN'
 ]
@@ -22,38 +22,22 @@ t_PLUS = r'\+'
 t_MINUS = r'\-'
 t_DIV = r'\/'
 t_MUL = r'\*'
-t_POW = r'\^^'
+t_POW = r'\^'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
-"""
-#t_LOG = r'\log'
-t_SIN = r'\sin'
-t_COS = r'\cos'
-t_TG = r'\tan'
-#t_CTG = r'\ctan'
-t_SQRT = r'\rad'
-"""
-
-"""
-
-def t_VAR(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = 'VAR'
-    return t
-      """
 
 def t_FUNCTION(t):
     r'sin|cos|tan|log|rad'
     return t
 
 def t_FLOAT(t):
-    r'[+-]?([1-9][0-9]*\.[0-9]+)|(0\.[0-9]+)'
+    r'\d+\.\d+'
     t.value = float(t.value)
     return t
 
 def t_INT(t):
-    r'[+-]?[1-9][0-9]*|0'
+    r'\d+'
     t.value = int(t.value)
     return t
 
@@ -70,11 +54,10 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-# lexer = lex.lex()
 
-# def p_function_exp(p):
-#     'function : expression PLUS function'
-#     p[0] = p[1] + p[3]
+lexer = lex.lex()
+# data = 'sin'
+# lexer.input(data)
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
@@ -82,18 +65,74 @@ precedence = (
     ('left', 'POW')
 )
 
-lexer = lex.lex()
-data = 'sin'
-lexer.input(data)
+def p_calc(p):   #start
+    '''
+    calc : expression
+        | empty
+    '''
+    print(evaluate(p[1]))
+
+def p_expression(p):   # creates a "tree" -> basic operations
+    '''
+    expression : expression POW expression
+                | expression MUL expression
+                | expression DIV expression
+                | expression PLUS expression
+                | expression MINUS expression
+    '''
+    p[0] = (p[2], p[1], p[3])
 
 
-# Tokenize
+def p_expression_number(p):   #single number
+    '''
+    expression : INT
+                | FLOAT
+    '''
+    p[0]=p[1]
+
+def p_error(p):
+    print("Syntax error")
+
+def p_empty(p):
+    '''
+    empty :
+    '''
+    p[0]=None
+
+parser = yacc.yacc()
+
+def evaluate(p):
+    if type(p) == tuple:
+        if p[0] == '+':
+            return evaluate(p[1]) + evaluate(p[2])
+        elif p[0] == '-':
+            return evaluate(p[1]) - evaluate(p[2])
+        elif p[0] == '*':
+            return evaluate(p[1]) * evaluate(p[2])
+        elif p[0] == '/':
+            return evaluate(p[1]) / evaluate(p[2])
+        elif p[0] == '^':
+            return pow(evaluate(p[1]), evaluate(p[2]))
+
+    else:
+        return p
+
+
+
 while True:
-    tok = lexer.token()
-    if not tok:
-        break  # No more input
-    print(tok)
-    parser.parse()
+    try:
+        expr = input('>> ')
+    except EOFError:
+        break
+    parser.parse(expr)
+
+        # Tokenize
+        # while True:
+        #     tok = lexer.token()
+        #     if not tok:
+        #         break  # No more input
+        #     print(tok)
+
 
 
 
