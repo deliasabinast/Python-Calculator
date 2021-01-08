@@ -1,5 +1,8 @@
 # lex/yacc calculator
-# supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log
+# supports +, -, *, /, ^^, sin, cos, tg, ctg, rad, log + new one @
+# bibliografie: https://www.dabeaz.com/ply/ply.html
+#               https://www.youtube.com/watch?v=Hh49BXmHxX8 (pretty much the same stuff)
+
 import math
 
 import ply.lex as lex
@@ -28,8 +31,9 @@ t_POW = r'\^\^'
 
 
 
+
 def t_FUNCTION(t):
-    r'sin|cos|tan|ctg|log|rad'
+    r'sin|cos|tan|ctg|log|rad|@'
     return t
 
 
@@ -51,7 +55,7 @@ def t_newline(t):
 
 t_ignore  = ' \t'
 
-def t_error(t):
+def t_error(t): #syntax error
     print("This is t_error")
     t.lexer.skip(1)
 
@@ -76,10 +80,10 @@ def p_function(p):  # sin cos tg ctg rad log
     '''
     expression : FUNCTION LP expression RP
     '''
-    p[0] = (p[1],p[3])  # ex: sin, 1
+    p[0] = (p[1],p[3])  # ex: sin, 1    sin(1)
 
 
-def p_expression_parentheses(p):
+def p_expression_parentheses(p): #parentheses case, ex: (1+2)*3
     '''
     expression : LP expression RP
     '''
@@ -97,9 +101,10 @@ def p_expression(p):  # creates a "tree" -> basic operations
                 | expression MINUS expression
     '''
     p[0] = (p[2],p[1],p[3])
+    print(p)
 
 
-def p_expression_uminus(p):
+def p_expression_uminus(p): #minus in front of an expression
     '''
     expression : MINUS expression %prec UMINUS
     '''
@@ -113,7 +118,7 @@ def p_expression_number(p):  # single number
     '''
     p[0] = p[1]
 
-def p_error(p):
+def p_error(p):  #parsing error
     print("This is p_error")
 
 
@@ -140,6 +145,8 @@ def evaluate(p):
             return evaluate(p[1]) / evaluate(p[2])
         elif p[0] == '^^':
             return pow(evaluate(p[1]),evaluate(p[2]))
+        elif p[0] == '@':
+            return pow(evaluate(p[1]),3/2)   #the new function, sqrt(something ^ 3) = something ^ (3/2)
         elif p[0] == 'sin':
             print(p[1])
             print("i do stuff")
